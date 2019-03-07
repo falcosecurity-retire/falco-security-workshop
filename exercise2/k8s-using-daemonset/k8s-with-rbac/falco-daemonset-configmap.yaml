@@ -1,0 +1,98 @@
+apiVersion: apiregistration.k8s.io/v1beta1
+kind: APIService
+metadata:
+  name: v1.falco.k8s.io
+spec:
+  insecureSkipTLSVerify: true
+  group: falco.k8s.io
+  service:
+    name: falco
+    namespace: default
+  version: v1
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: falco
+  namespace: default
+spec:
+  selector:
+    name: falco
+  ports:
+  - protocol: TCP
+    port: 443
+    targetPort: 8765
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: falco
+  namespace: default
+  labels:
+    name: falco-daemonset
+    app: demo
+spec:
+  template:
+    metadata:
+      labels:
+        name: falco
+        app: demo
+        role: security
+    spec:
+      serviceAccount: falco-account
+      containers:
+        - name: falco
+          image: falcosecurity/falco:latest
+          env:
+          - name: SYSDIG_BPF_PROBE
+            value: ""
+          securityContext:
+            privileged: true
+          args: [ "/usr/bin/falco", "-K", "/var/run/secrets/kubernetes.io/serviceaccount/token", "-k", "https://kubernetes.default"]
+          volumeMounts:
+            - mountPath: /host/var/run/docker.sock
+              name: docker-socket
+            - mountPath: /host/dev
+              name: dev-fs
+            - mountPath: /host/proc
+              name: proc-fs
+              readOnly: true
+            - mountPath: /host/boot
+              name: boot-fs
+              readOnly: true
+            - mountPath: /host/lib/modules
+              name: lib-modules
+              readOnly: true
+            - mountPath: /host/usr
+              name: usr-fs
+              readOnly: true
+            - mountPath: /host/etc
+              name: etc-fs
+              readOnly: true
+            - mountPath: /etc/falco
+              name: falco-config
+      volumes:
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+        - name: dev-fs
+          hostPath:
+            path: /dev
+        - name: proc-fs
+          hostPath:
+            path: /proc
+        - name: boot-fs
+          hostPath:
+            path: /boot
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: usr-fs
+          hostPath:
+            path: /usr
+        - name: etc-fs
+          hostPath:
+            path: /etc
+        - name: falco-config
+          configMap:
+            name: falco-config

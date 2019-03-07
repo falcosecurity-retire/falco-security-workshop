@@ -1,4 +1,8 @@
+- macro: app_nginx
+  condition: container and container.image contains "nginx"
+
 # Restricting listening ports to selected set
+
 
 - list: nginx_allowed_inbound_ports_tcp
   items: [80, 443, 8080, 8443]

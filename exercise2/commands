@@ -1,0 +1,6 @@
+sudo minikube start --vm-driver none --extra-config=apiserver.enable-admission-plugins=Initializers,NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,NodeRestriction,ResourceQuota,PodSecurityPolicy
+
+sudo kubectl get nodes
+helm init
+helm repo update 
+helm install --name sysdig-falco-1 --set integrations.natsOutput.enabled=true --set ebpf.enabled=true -f custom-rules.yaml stable/falco
