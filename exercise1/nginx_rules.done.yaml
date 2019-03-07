@@ -1,0 +1,33 @@
+# Restricting listening ports to selected set
+
+- list: nginx_allowed_inbound_ports_tcp
+  items: [80, 443, 8080, 8443]
+
+- rule: Unexpected inbound tcp connection nginx
+  desc: Detect inbound traffic to nginx using tcp on a port outside of expected set
+  condition: inbound and evt.rawres >= 0 and not fd.sport in (nginx_allowed_inbound_ports_tcp) and app_nginx
+  output: Inbound network connection to nginx on unexpected port (command=%proc.cmdline pid=%proc.pid connection=%fd.name sport=%fd.sport user=%user.name %container.info image=%container.image)
+  priority: NOTICE
+
+# Restricting spawned processes to selected set
+
+- list: nginx_allowed_processes
+  items: ["nginx", "app-entrypoint.", "basename", "dirname", "grep", "nami", "node", "tini"]
+
+- rule: Unexpected spawned process nginx
+  desc: Detect a process started in a nginx container outside of an expected set
+  condition: spawned_process and not proc.name in (nginx_allowed_processes) and app_nginx
+  output: Unexpected process spawned in nginx container (command=%proc.cmdline pid=%proc.pid user=%user.name %container.info image=%container.image)
+  priority: NOTICE
+
+# Restricting files read or written to specific set
+
+- list: nginx_allowed_file_prefixes_readwrite
+  items: ["/var/log/nginx", "/var/run"]
+# Remember to add your nginx cache path
+
+- rule: Unexpected file access readwrite for nginx
+  desc: Detect an attempt to access a file readwrite other than below an expected list of directories
+  condition: (open_write) and not fd.name pmatch (nginx_allowed_file_prefixes_readwrite) and app_nginx
+  output: Unexpected file accessed readwrite for nginx (command=%proc.cmdline pid=%proc.pid file=%fd.name %container.info image=%container.image)
+  priority: NOTICE

@@ -1,0 +1,20 @@
+docker-compose up -d
+sudo sysdig -w nginx.scap &
+curl http://127.0.0.1:8080/
+fg 1
+ctrl-c
+sysdig -r nginx.scap -c topfiles_bytes container.name = example1_nginx0 
+sysdig -r nginx.scap -c topprocs_cpu container.name = example1_nginx0 
+sysdig -r nginx.scap -c topports_server container.name = example1_nginx0
+
+cp nginx_rules.yaml rules/
+
+docker-compose down
+docker-compose up -d
+
+docker-compose logs example1_falco0
+docker-compose exec example1_nginx0 bash
+
+touch /tmp/hello
+
+

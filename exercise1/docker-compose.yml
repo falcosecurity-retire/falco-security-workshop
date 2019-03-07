@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - 8080:80
+
+  falco:
+    image: falcosecurity/falco:latest
+    volumes:
+      - ./rules/:/etc/falco/rules.d       
