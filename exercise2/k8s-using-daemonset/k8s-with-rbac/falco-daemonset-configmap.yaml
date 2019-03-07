@@ -1,14 +1,3 @@
-apiVersion: apiregistration.k8s.io/v1beta1
-kind: APIService
-metadata:
-  name: v1.falco.k8s.io
-spec:
-  insecureSkipTLSVerify: true
-  group: falco.k8s.io
-  service:
-    name: falco
-    namespace: default
-  version: v1
 ---
 kind: Service
 apiVersion: v1
@@ -43,9 +32,6 @@ spec:
       containers:
         - name: falco
           image: falcosecurity/falco:latest
-          env:
-          - name: SYSDIG_BPF_PROBE
-            value: ""
           securityContext:
             privileged: true
           args: [ "/usr/bin/falco", "-K", "/var/run/secrets/kubernetes.io/serviceaccount/token", "-k", "https://kubernetes.default"]
