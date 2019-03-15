@@ -1,31 +1,15 @@
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: falco
-  namespace: default
-spec:
-  selector:
-    name: falco
-  ports:
-  - protocol: TCP
-    port: 443
-    targetPort: 8765
----
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: falco
-  namespace: default
+  name: falco-daemonset
   labels:
-    name: falco-daemonset
-    app: demo
+    app: falco-example
+    role: security
 spec:
   template:
     metadata:
       labels:
-        name: falco
-        app: demo
+        app: falco-example
         role: security
     spec:
       serviceAccount: falco-account
@@ -34,7 +18,14 @@ spec:
           image: falcosecurity/falco:latest
           securityContext:
             privileged: true
-          args: [ "/usr/bin/falco", "-K", "/var/run/secrets/kubernetes.io/serviceaccount/token", "-k", "https://kubernetes.default"]
+# Uncomment the 3 lines below to enable eBPF support for Falco.
+# This allows Falco to run on Google COS.
+# Leave blank for the default probe location, or set to the path
+# of a precompiled probe.
+#          env:
+#          - name: SYSDIG_BPF_PROBE
+#            value: ""
+          args: [ "/usr/bin/falco", "-K", "/var/run/secrets/kubernetes.io/serviceaccount/token", "-k", "https://kubernetes.default", "-pk"]
           volumeMounts:
             - mountPath: /host/var/run/docker.sock
               name: docker-socket
@@ -52,7 +43,7 @@ spec:
             - mountPath: /host/usr
               name: usr-fs
               readOnly: true
-            - mountPath: /host/etc
+            - mountPath: /host/etc/
               name: etc-fs
               readOnly: true
             - mountPath: /etc/falco

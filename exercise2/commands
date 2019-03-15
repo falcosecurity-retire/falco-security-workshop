@@ -1,22 +1,8 @@
-sudo minikube start --vm-driver none 
+./start.sh
 
 cd k8s-using-daemonset/
 sudo kubectl create -f k8s-with-rbac/falco-account.yaml
 sudo kubectl create configmap falco-config --from-file=falco-config/
 sudo kubectl create -f k8s-with-rbac/falco-daemonset-configmap.yaml 
 
-
-
-
-sudo mkdir -p /var/lib/k8s_audit
-
-sudo cp audit-policy.yaml /var/lib/k8s_audit
-sudo cp webhook-config.yaml /var/lib/k8s_audit
-sudo cp apiserver-config.patch.sh /var/lib/k8s_audit
-
-echo "***Modifying k8s apiserver config (will result in apiserver restarting)..."
-
-sudo bash /var/lib/k8s_audit/apiserver-config.patch.sh /etc/kubernetes/manifests/kube-apiserver.yaml minikube
-
-
-sudo kubectl get nodes
+kubectl get pods

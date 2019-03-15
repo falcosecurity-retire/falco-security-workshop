@@ -1,3 +1,22 @@
+#
+# Copyright (C) 2016-2018 Draios Inc dba Sysdig.
+#
+# This file is part of falco.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+- required_engine_version: 2
+
 # Generally only consider audit events once the response has completed
 - list: k8s_audit_stages
   items: ["ResponseComplete"]
@@ -15,14 +34,12 @@
 
 # If you wish to restrict activity to a specific set of users, override/append to this list.
 - list: allowed_k8s_users
-  items: ["minikube", "minikube-user"]
+  items: ["minikube", "minikube-user", "kubelet", "kops"]
 
 - rule: Disallowed K8s User
   desc: Detect any k8s operation by users outside of an allowed set of users.
   condition: kevt and non_system_user and not ka.user.name in (allowed_k8s_users)
-  output: > 
-    K8s Operation performed by user not in allowed list of users (user=%ka.user.name 
-    target=%ka.target.name/%ka.target.resource verb=%ka.verb uri=%ka.uri resp=%ka.response.code)
+  output: K8s Operation performed by user not in allowed list of users (user=%ka.user.name target=%ka.target.name/%ka.target.resource verb=%ka.verb uri=%ka.uri resp=%ka.response.code)
   priority: WARNING
   source: k8s_audit
   tags: [k8s]
