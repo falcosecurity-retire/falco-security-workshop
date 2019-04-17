@@ -1,0 +1,87 @@
+#!/bin/bash
+#
+# Deploys a playbook
+
+set -e
+
+function usage() {
+  cat<<EOF
+Usage: $0 [options]
+
+-p playbook       Playbook to be deployed. Is the script for Kubeless: slack, taint, isolate.
+-e environment    Environment variables for the Kubeless function.  You can pass multiple environment variables passing several -e parameters.
+-s subscription   Falco alert subscription. You can bind to multiple alerts passing several -s parameters.
+
+You must pass the playbook and at least one falco alert to subscribe.
+
+Example:
+
+deploy_playbook -p slack -s "falco.error.*" -e SLACK_WEBHOOK_URL=http://foobar.com/...
+EOF
+  exit 1
+}
+
+function create_environment_flags {
+  for env in ${environment[*]}; do
+    echo "--env ${env} "
+  done
+}
+
+playbook=""
+environment=()
+subscriptions=()
+
+while getopts "p:e:s:" arg; do
+  case $arg in
+    p)
+      playbook="${OPTARG}"
+      ;;
+    e)
+      environment+=("${OPTARG}")
+      ;;
+    s)
+      subscriptions+=("${OPTARG}")
+      ;;
+    *)
+      usage
+      ;;
+  esac
+done
+
+if [[ "${playbook}" == "" || ${#subscriptions[@]} -eq 0 ]]; then
+  usage
+fi
+
+pipenv lock --requirements | sed '/^-/ d' > requirements.txt
+
+mkdir -p kubeless-function
+
+cp -r playbooks kubeless-function/
+
+cat > kubeless-function/"${playbook}".py <<EOL
+import sys
+import os.path
+sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__))))
+
+EOL
+cat functions/"${playbook}".py >> kubeless-function/"${playbook}".py
+
+
+cd kubeless-function
+zip ../"${playbook}".zip -r *
+cd ..
+
+kubeless function deploy  --from-file "${playbook}".zip \
+                          --dependencies requirements.txt \
+                          $(create_environment_flags ${environment[*]}) \
+                          --runtime python3.6 \
+                          --handler "${playbook}".handler \
+                          falco-"${playbook}"
+
+rm -fr requirements.txt ${playbook}.zip kubeless-function
+
+for index in ${!subscriptions[*]}; do
+  kubeless trigger nats create falco-"${playbook}"-trigger-"${index}" \
+      --function-selector created-by=kubeless,function=falco-${playbook} \
+      --trigger-topic "${subscriptions[$index]}"
+done

@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+mamba = "*"
+expects = "*"
+doublex = "*"
+doublex-expects = "==0.7.0rc2"
+six = "*"
+playbooks = {path = "."}
+
+[packages]
+kubernetes = "*"
+requests = "*"
+"e1839a8" = {path = ".", editable = true}
+pendulum = "*"
+pyyaml = ">=5.1"
+
+[requires]
+python_version = "*"

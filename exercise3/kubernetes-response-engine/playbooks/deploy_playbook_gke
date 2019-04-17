@@ -1,0 +1,102 @@
+#!/bin/bash
+#
+# Deploys a playbook
+
+set -e
+
+function usage() {
+  cat<<EOF
+Usage: $0 -p PLAYBOOK -t TOPIC_NAME -s SUBSCRIPTION_TO_ALERT -k CLUSTER_NAME -z ZONE_NAME -n PROJECT_NAME [-e ENV_VAR...]
+
+-p playbook             Playbook to be deployed. Is the script for Kubeless: slack, taint, isolate.
+-e environment          Environment variables for the Kubeless function.  You can pass multiple environment variables passing several -e parameters.
+-t topic_name           Topic to subscribe
+-s subscription         Falco alert subscription. You can bind to multiple alerts passing several -s parameters.
+-k k8s_cluster_name     Name of the GKE cluster
+-z k8s_zone_name        Name of the zone where the GKE cluster is deployed
+-n k8s_project_name     Name of the GKE project
+
+You must pass at least the playbook, one topic, one falco alert to subscribe, the cluster name, the zone name and the project name.
+
+Example:
+
+deploy_playbook_gke -p slack -e SLACK_WEBHOOK_URL=http://foobar.com/... -s falco.warning.terminal_shell_in_container -k sysdig_eks -z us-central1-a -n project-name
+EOF
+  exit 1
+}
+
+function join { local IFS="$1"; shift; echo "$*"; }
+
+playbook=""
+environment=("KUBECONFIG=kubeconfig" "KUBERNETES_LOAD_KUBE_CONFIG=1")
+topic_name="${TOPIC_NAME}"
+subscriptions=()
+cluster_name=""
+zone=""
+project_name=""
+
+while getopts "p:e:t:s:k:z:n:" arg; do
+  case $arg in
+    p)
+      playbook="${OPTARG}"
+      ;;
+    e)
+      environment+=("${OPTARG}")
+      ;;
+    t)
+      topic_name="${OPTARG}"
+      ;;
+    s)
+      subscriptions+=("${OPTARG}")
+      ;;
+    k)
+      cluster_name="${OPTARG}"
+      ;;
+    z)
+      zone="${OPTARG}"
+      ;;
+    n)
+      project_name="${OPTARG}"
+      ;;
+    *)
+      usage
+      ;;
+  esac
+done
+
+if [[ "${playbook}" == "" ||  ${#subscriptions[@]} -eq 0 || "${topic_name}" == "" || "${cluster_name}" == "" ||  "${zone}" == "" || "${project_name}" == "" ]]; then
+  usage
+fi
+
+pipenv lock --requirements | sed '/^-/ d' > requirements.txt
+
+directory="google-function"
+
+mkdir -p ${directory}/${playbook}
+cp -r playbooks ${directory}/${playbook}
+
+cp requirements.txt ${directory}/${playbook}/requirements.txt
+cp functions/"${playbook}".py ${directory}/${playbook}/main.py
+cd ${directory}/${playbook}
+
+KUBECONFIG="kubeconfig" gcloud container \
+  clusters get-credentials ${cluster_name} \
+  --zone ${zone} \
+  --project ${project_name}
+
+cd ..
+
+
+subscr="$(join , ${subscriptions[@]})"
+environment+=("SUBSCRIBED_ALERTS=${subscr}")
+
+gcloud functions deploy ${playbook} \
+  --project ${project_name} \
+  --source ${PWD}/${playbook} \
+  --entry-point handler \
+  --runtime python37 \
+  --trigger-topic ${topic_name} \
+  --set-env-vars="$(join , ${environment[@]})"
+
+cd ..
+rm -fr ${directory} requirements.txt

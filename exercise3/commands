@@ -1,0 +1,7 @@
+cd ../exercise3
+helm init
+helm install --name sysdig-falco-1 --set integrations.natsOutput.enabled=true stable/falco
+cd kubernetes-response-engine/deployment/cncf
+make
+cd ../../playbooks
+./deploy_playbook -p delete -t "falco.notice.terminal_shell_in_container"
