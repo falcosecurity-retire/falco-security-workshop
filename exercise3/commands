@@ -1,7 +1,26 @@
 cd ../exercise3
 helm init
-helm install --name sysdig-falco-1 --set integrations.natsOutput.enabled=true stable/falco
+helm install --name falco-1 --set integrations.natsOutput.enabled=true stable/falco
+kubectl get pods
+kubectl logs falco-1-<podid>
+helm get falco-1
 cd kubernetes-response-engine/deployment/cncf
 make
+kubeless function list
+kubeless trigger nats list
 cd ../../playbooks
-./deploy_playbook -p delete -t "falco.notice.terminal_shell_in_container"
+./deploy_playbook -p delete -s "falco.notice.terminal_shell_in_container"
+kubeless function list
+kubeless trigger nats list
+cd ../../
+kubectl apply -f nginx.yaml
+kubectl get pods
+kubectl exec -it nginx-deployment-<id>-<id> -- bash
+kubectl logs falco-1-xb9q2 falco
+kubectl delete -f nginx.yaml
+kubeless trigger nats delete falco-delete-trigger-0
+kubeless function delete falco-delete
+cd kubernetes-response-engine/deployment/cncf/
+make clean
+cd ../../..
+helm del --purge falco-1
