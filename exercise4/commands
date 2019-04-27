@@ -1,0 +1,57 @@
+cd ../exercise4/
+
+kubectl create ns logging
+
+helm install stable/elasticsearch --namespace logging --name elasticsearch --version 1.26.0 -f es-values.yaml  
+helm install stable/fluentd-elasticsearch --name fluentd --namespace logging --version 2.0.7  
+helm install stable/kibana --name kibana --namespace logging --version 2.2.0 -f kb-values.yaml 
+
+helm install stable/falco --name falco --set image.tag=dev,falco.jsonOutput=true,fakeEventGenerator.enabled=true
+
+export POD_NAME=$(kubectl get pods --namespace logging -l "app=kibana,release=kibana" -o jsonpath="{.items[0].metadata.name}")
+kubectl port-forward --namespace logging --address 0.0.0.0 $POD_NAME 8000:5601
+
+http://<yourip>:8000/app/kibana
+
+Create new index - logstash*
+    
+
+kubernetes.labels.app is falco, output: "exists"
+
+Area chart of all Falco alerts over time.
+    Aggregation: Date Histogram
+    Field: @timestamp
+    Interval: Minute
+Pie chart of top 10 Falco rules triggered.
+    Split Slices
+    Aggregation: Significant Terms
+    Field: rule.keyword
+    Count: 10
+Pie chart of alerts by priority.
+    Split Slices
+    Aggregation: Significant Terms
+    Field: priority.keyword
+    Count: 10
+Table of top 20 Falco rules triggered.
+    Split Rows
+    Aggregation: Significant Terms
+    Field: rule.keyword
+    Count: 20
+Table of Falco alerts by Kubernetes Node
+    Split Rows
+    Aggregation: Significant Terms
+    Field: kubernetes.host.keyword
+    Count: 20
+Table of Falco alerts by Kubernetes Pod
+    Split Rows
+    Aggregation: Significant Terms
+    Field: output_fields.k8s.pod.name.keyword
+    Count: 20
+
+Dashboard order:
+* Area chart of all Falco alerts over time.
+* Pie chart of top 10 Falco rules triggered.
+* Pie chart of alerts by priority.
+* Table of top 20 Falco rules triggered.
+* Table of Falco alerts by Kubernetes Node
+* Table of Falco alerts by Kubernetes Pod
