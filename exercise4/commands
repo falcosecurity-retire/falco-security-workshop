@@ -11,17 +11,20 @@ helm install stable/falco --name falco --set image.tag=dev,falco.jsonOutput=true
 export POD_NAME=$(kubectl get pods --namespace logging -l "app=kibana,release=kibana" -o jsonpath="{.items[0].metadata.name}")
 kubectl port-forward --namespace logging --address 0.0.0.0 $POD_NAME 8000:5601
 
+helm upgrade falco stable/falco --set image.tag=dev,falco.jsonOutput=true,fakeEventGenerator.enabled=false
+
 http://<yourip>:8000/app/kibana
 
 Create new index - logstash*
-    
+
 
 kubernetes.labels.app is falco, output: "exists"
 
 Area chart of all Falco alerts over time.
     Aggregation: Date Histogram
     Field: @timestamp
-    Interval: Minute
+    Interval: Auto
+    Custom Label: Falco Alerts
 Pie chart of top 10 Falco rules triggered.
     Split Slices
     Aggregation: Significant Terms
@@ -55,3 +58,10 @@ Dashboard order:
 * Table of top 20 Falco rules triggered.
 * Table of Falco alerts by Kubernetes Node
 * Table of Falco alerts by Kubernetes Pod
+
+
+#Clean up
+helm del --purge falco
+helm del --purge fluentd
+helm del --purge kibana
+helm del --purge elasticsearch
