@@ -4,6 +4,10 @@ This repository contains the necessary files required to go through the exercise
 
 ## Exercises
 
+Container Security Workshop - [Google Slides](https://setns.run/falcows)
+
+Each exercise contains a `commands` file with the commands to complete the exercise. In addition, the [slides](https://setns.run/falcows) contain the commands to run and the expected output. 
+
 ### Exercise 1
 
 This exercise walks you through the Falco basics. It teaches you about Falco rules, and how to use [Sysdig](https://github.com/draios/sysdig) to profile an application to create custom rules. At the end of this exercise, you'll understand how to write your own Falco rules.
@@ -35,4 +39,23 @@ For simplicity we've provided an AWS AMI (ami-045b9556899705148, us-east-1) that
 
 ### Roll Your Own
 
-If you wish to build your own workstation image, you can reference the Packer template provided in [this repo](https://github.com/draios/sysdig-workshop-infra/blob/master/packer/ubuntu-1604-falco.json). Anything installed in the image is done primarily by a [Chef Cookbook](https://github.com/draios/sysdig-workshop-infra/tree/master/cookbooks/falco_workstation).
+If you wish to build your own workstation image, you can reference the Packer template provided in [this repo](https://github.com/draios/sysdig-workshop-infra/blob/master/packer/ubuntu-1604-falco.json). Anything installed in the image is done primarily by a [Chef Cookbook](https://github.com/draios/sysdig-workshop-infra/tree/master/cookbooks/falco_workstation). Additional software is installed by the `setup-falco.sh` script in order to pull the latest versions.  
+
+## License
+
+![Creative Commons License](https://i.creativecommons.org/l/by-sa/4.0/80x15.png) This work is licensed under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/).
+
+**You are free to:**
+* **Share** — copy and redistribute the material in any medium or format
+* **Adapt** — remix, transform, and build upon the material
+for any purpose, even commercially.
+
+**Under the following terms:**
+* **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+
+* **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
+
+* **No additional restrictions** — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+
+For the full text of the license, see [COPYING](./COPYING).
+
