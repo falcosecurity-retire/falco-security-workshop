@@ -22,7 +22,7 @@ This exercise walks you through implementing a [Response Engine with Security Pl
 
 ### Exercise 4
 
-This exercise wakls you through setting up an EFK ([Elasticsearch](https://www.elastic.co/products/elasticsearch), [Fluentd](https://www.fluentd.org/), and [Kibana](https://www.elastic.co/products/kibana)) stack and collecting Falco alerts for storage and analysis. You'll deploy Falco and the EFK stack via Helm, and create visualizations and dashboards in Kibana. At the end of the exercise, you'll understand how to collect and store Falco alerts, as well as how to visualize the alerts.
+This exercise walks you through setting up an EFK ([Elasticsearch](https://www.elastic.co/products/elasticsearch), [Fluentd](https://www.fluentd.org/), and [Kibana](https://www.elastic.co/products/kibana)) stack and collecting Falco alerts for storage and analysis. You'll deploy Falco and the EFK stack via Helm, and create visualizations and dashboards in Kibana. At the end of the exercise, you'll understand how to collect and store Falco alerts, as well as how to visualize the alerts.
 
 ## Required Workstation
 
