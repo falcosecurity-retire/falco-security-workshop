@@ -28,7 +28,7 @@ This exercise walks you through setting up an EFK ([Elasticsearch](https://www.e
 
 ### AWS
 
-For simplicity we've provided an AWS AMI (ami-045b9556899705148, us-east-1) that provides a workstation with all the required software. 
+For simplicity we've provided an AWS AMI (ami-0893c0781761fa458, us-east-1) that provides a workstation with all the required software. 
 
 * Setup Script: `/usr/local/bin/setup-falco.sh` 
     * This script *MUST* be ran by the `falco` user after the first login (or as part of the instance's userdata). This script clones the latest version of the training (this repo), installs the latest version of Sysdig, and configures other tools required. If running the script manually, it is suggested to logout and back in after running the script.   
