@@ -3,9 +3,9 @@
 kubectl get nodes
 
 cd k8s-using-daemonset/k8s-with-rbac
-kubectl create -f falco-account.yaml
+kubectl apply -f falco-account.yaml
 kubectl create configmap falco-config --from-file=falco-config/
-kubectl create -f falco-daemonset-configmap.yaml
+kubectl apply -f falco-daemonset-configmap.yaml
 kubectl get pods
 
 kubectl logs falco-daemonset-<id of pod>
@@ -13,6 +13,7 @@ kubectl logs falco-daemonset-<id of pod>
 cd ../..
 
 kubectl create configmap aws-creds --from-file=aws-creds
+kubectl exec -it falco-daemonset-<id of pod> -- bash
 
 kubectl logs falco-daemonset-<id of pod>
 
