@@ -3,9 +3,8 @@
 
 # Restricting listening ports to selected set
 
-
 - list: nginx_allowed_inbound_ports_tcp
-  items: [80, 443, 8080, 8443]
+  items: [ 80 ]
 
 - rule: Unexpected inbound tcp connection nginx
   desc: Detect inbound traffic to nginx using tcp on a port outside of expected set
@@ -16,7 +15,7 @@
 # Restricting spawned processes to selected set
 
 - list: nginx_allowed_processes
-  items: ["nginx", "app-entrypoint.", "basename", "dirname", "grep", "nami", "node", "tini"]
+  items: [ nginx ]
 
 - rule: Unexpected spawned process nginx
   desc: Detect a process started in a nginx container outside of an expected set
@@ -27,7 +26,7 @@
 # Restricting files read or written to specific set
 
 - list: nginx_allowed_file_prefixes_readwrite
-  items: ["/var/log/nginx", "/var/run"]
+  items: [ /usr/share/nginx/html/ ]
 # Remember to add your nginx cache path
 
 - rule: Unexpected file access readwrite for nginx
