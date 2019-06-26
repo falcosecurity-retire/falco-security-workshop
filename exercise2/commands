@@ -19,3 +19,4 @@ kubectl logs falco-daemonset-<id of pod>
 
 kubectl delete -f k8s-using-daemonset/k8s-with-rbac/
 kubectl delete configmap falco-config 
+kubectl delete configmap aws-creds
