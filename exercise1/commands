@@ -1,8 +1,10 @@
 docker-compose up -d
+sysdig container.name = exercise1_nginx_1
 sudo sysdig -w nginx.scap &
 curl http://127.0.0.1:8080/
 fg 1
 ctrl-c
+sysdig -r nginx.scap -c spy_users
 sysdig -r nginx.scap -p "%fd.name" "container.name = exercise1_nginx_1 and evt.type = open"
 
 sysdig -r nginx.scap -c topprocs_cpu container.name = exercise1_nginx_1
@@ -14,7 +16,7 @@ cp nginx_rules.yaml rules/
 docker-compose down
 docker-compose up -d
 
-docker-compose logs falco
+docker-compose logs -f falco
 docker-compose exec nginx bash
 
 touch /tmp/hello
